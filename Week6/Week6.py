@@ -1,34 +1,64 @@
+import math
 import time
 
 def minimax_prune(state):
-    alpha = -1
-    beta = 1
+    alpha = float('-inf')
+    beta = float('inf')
     if state[1] == 1:
         return max_value_prune(state, alpha, beta)
     else:
         return min_value_prune(state, alpha, beta)
 
-def successors(state):
-    next_states = []
-    piles, player = state
 
-    for i, pile in enumerate(piles):
-        for taken in range(1, min(4, pile + 1)):
-            new_piles = list(piles)  # Create a copy of piles
-            new_piles[i] -= taken
-            # Toggle player correctly for the next turn
-            next_player = 2 if player == 1 else 1
-            next_states.append((tuple(new_piles), next_player))
+def nextstates(state):
+    # Function to get all next states
+    # Need to change turn and generate possible options
 
-    return next_states
+    succ = []  # the next states
+    # Successor state is the next player, so change turn
+    turn = state[1]
+    if turn == 1:
+        turn = 2
+    else:
+        turn = 1
+
+    # Sort piles, i.e. state [3,2]
+    piles = state[0]
+    # Go through each pile and generate possible options
+    for i in range(len(piles)):
+
+        # Try removing 1, 2, or 3 sticks
+        for rem in range(1, 4):
+            # Remove rem sticks from a pile
+            if piles[i] >= rem:
+                next_state = piles.copy()
+                next_state[i] = next_state[i] - rem
+
+                # Check for any zeros and remove
+                temp_state = []
+                for zerocheck in range(len(next_state)):
+                    if next_state[zerocheck] != 0:
+                        temp_state.append(next_state[zerocheck])
+
+                # Add to next states
+                succ.append((temp_state, turn))
+
+    # removing duplicates from list
+    res = []
+    for i in succ:
+        if i not in res:
+            res.append(i)
+
+    # Return the list of successors, possible outcomes
+    return (res)
 
 
 def min_value_prune(state, alpha, beta):
     if terminalTest(state):
         return -1
-    v = float('inf')
-    for s in successors(state):
-        vD = max_value_prune(state, alpha, beta)
+    v = float('-inf')
+    for s in nextstates(state):
+        vD = max_value_prune(s, alpha, beta)
         if vD < v:
             v = vD
         if vD <= alpha:
@@ -40,9 +70,9 @@ def min_value_prune(state, alpha, beta):
 def max_value_prune(state, alpha, beta):
     if terminalTest(state):
         return 1
-    v = float('-inf')
-    for s in successors(state):
-        vD = min_value_prune(state, alpha, beta)
+    v = float('inf')
+    for s in nextstates(state):
+        vD = min_value_prune(s, alpha, beta)
         if vD > v:
             v = vD
         if vD >= beta:
@@ -52,9 +82,14 @@ def max_value_prune(state, alpha, beta):
     return v
 
 def terminalTest(state):
-    piles, player = state
-    return sum(piles) == 0
-
+    # Function to test if goal has been met
+    # True if met, false if not
+    if state == ([], 1):
+        return 1
+    elif state == ([], 2):
+        return -1
+    else:
+        return 0
 
 def test_timing(state):
     # Start a timer
@@ -67,6 +102,6 @@ def test_timing(state):
     #print('Time taken:', duration)
     return duration, value
 
-output = (test_timing(([8,8],2)))
+output = (test_timing(([5,5,5],1)))
 print("Time within limit", output[0])
 print("Value returned", output[1])
