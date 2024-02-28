@@ -14,7 +14,7 @@ def nextstates(state):
     # Function to get all next states
     # Need to change turn and generate possible options
 
-    succ = []  # the next states
+    succ_dict = {}  # the next states
     # Successor state is the next player, so change turn
     turn = state[1]
     if turn == 1:
@@ -23,42 +23,38 @@ def nextstates(state):
         turn = 1
 
     # Sort piles, i.e. state [3,2]
-    piles = state[0]
     # Go through each pile and generate possible options
-    for i in range(len(piles)):
+    for i in range(len(state[0])):
 
         # Try removing 1, 2, or 3 sticks
         for rem in range(1, 4):
             # Remove rem sticks from a pile
-            if piles[i] >= rem:
-                next_state = piles.copy()
-                next_state[i] = next_state[i] - rem
+            if state[0][i] >= rem:
+                new_piles = state[0][:i] + [state[0][i] - rem] + state[0][i + 1:]
+                next_state = new_piles, turn
 
-                # Check for any zeros and remove
                 temp_state = []
-                for zerocheck in range(len(next_state)):
-                    if next_state[zerocheck] != 0:
-                        temp_state.append(next_state[zerocheck])
+                for zerocheck in range(len(new_piles)):
+                    if new_piles[zerocheck] != 0:
+                        temp_state.append(new_piles[zerocheck])
+
+                next_state = new_piles, turn
 
                 # Add to next states
-                succ.append((temp_state, turn))
 
     # removing duplicates from list
-    res = []
-    for i in succ:
-        if i not in res:
-            res.append(i)
 
     # Return the list of successors, possible outcomes
-    return (res)
+    print(list(dict.fromkeys(succ_dict)))
+    return succ
 
 
 def min_value_prune(state, alpha, beta):
     if terminalTest(state):
         return -1
-    v = float('-inf')
+    v = float('inf')
     for s in nextstates(state):
-        vD = max_value_prune(s, alpha, beta)
+        vD = max_value_prune(s,alpha,beta)
         if vD < v:
             v = vD
         if vD <= alpha:
@@ -70,7 +66,7 @@ def min_value_prune(state, alpha, beta):
 def max_value_prune(state, alpha, beta):
     if terminalTest(state):
         return 1
-    v = float('inf')
+    v = float('-inf')
     for s in nextstates(state):
         vD = min_value_prune(s, alpha, beta)
         if vD > v:
@@ -102,6 +98,8 @@ def test_timing(state):
     #print('Time taken:', duration)
     return duration, value
 
-output = (test_timing(([5,5,5],1)))
+
+
+output = (test_timing(([8,8,8],1)))
 print("Time within limit", output[0])
 print("Value returned", output[1])
