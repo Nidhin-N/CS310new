@@ -1,7 +1,10 @@
 import math
 import time
 
+visited = {}
 def minimax_prune(state):
+    global visited
+    visited = {}
     alpha = float('-inf')
     beta = float('inf')
     if state[1] == 1:
@@ -14,7 +17,8 @@ def nextstates(state):
     # Function to get all next states
     # Need to change turn and generate possible options
 
-    succ_dict = {}  # the next states
+    succ = []  # the next states
+
     # Successor state is the next player, so change turn
     turn = state[1]
     if turn == 1:
@@ -31,27 +35,35 @@ def nextstates(state):
             # Remove rem sticks from a pile
             if state[0][i] >= rem:
                 new_piles = state[0][:i] + [state[0][i] - rem] + state[0][i + 1:]
-                next_state = new_piles, turn
 
                 temp_state = []
                 for zerocheck in range(len(new_piles)):
                     if new_piles[zerocheck] != 0:
                         temp_state.append(new_piles[zerocheck])
+                        temp_state.sort()
 
-                next_state = new_piles, turn
+                succ.append((temp_state, turn))
 
                 # Add to next states
 
     # removing duplicates from list
-
+    res = []
+    for i in succ:
+        if i not in res:
+            res.append(i)
     # Return the list of successors, possible outcomes
-    print(list(dict.fromkeys(succ_dict)))
-    return succ
+    return res
 
 
 def min_value_prune(state, alpha, beta):
     if terminalTest(state):
         return -1
+
+    state_tuple = (tuple(state[0]), state[1])
+
+    if state_tuple in visited:
+        return visited[state_tuple]
+
     v = float('inf')
     for s in nextstates(state):
         vD = max_value_prune(s,alpha,beta)
@@ -61,11 +73,17 @@ def min_value_prune(state, alpha, beta):
             return v
         if vD < beta:
             beta = vD
+    visited[state_tuple] = v
     return v
 
 def max_value_prune(state, alpha, beta):
     if terminalTest(state):
         return 1
+    state_tuple = (tuple(state[0]), state[1])
+
+    if state_tuple in visited:
+        return visited[state_tuple]
+
     v = float('-inf')
     for s in nextstates(state):
         vD = min_value_prune(s, alpha, beta)
@@ -75,6 +93,7 @@ def max_value_prune(state, alpha, beta):
             return v
         if vD > alpha:
             alpha = vD
+    visited[state_tuple] = v
     return v
 
 def terminalTest(state):
@@ -100,6 +119,6 @@ def test_timing(state):
 
 
 
-output = (test_timing(([8,8,8],1)))
+output = (test_timing(([6,4,2,3,5,5,5],1)))
 print("Time within limit", output[0])
 print("Value returned", output[1])
