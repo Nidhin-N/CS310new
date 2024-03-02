@@ -119,6 +119,7 @@ def min_value_prune(state, alpha, beta):
         return -1
 
     v = float('inf')
+    bestSucc = ""
     for s in nextstates(state):
         vD = max_value_prune(s,alpha,beta)
         if vD < v:
@@ -151,6 +152,7 @@ def max_value_prune(state, alpha, beta):
         vD = min_value_prune(s, alpha, beta)
         if vD > v:
             v = vD
+            bestSucc = s
         if vD >= beta:
             return v
         if vD > alpha:

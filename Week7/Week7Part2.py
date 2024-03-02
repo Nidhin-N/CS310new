@@ -2,7 +2,6 @@ import random
 import time
 import math
 
-visited = []
 # Main function to run game
 def Nim():
     # initial variables
