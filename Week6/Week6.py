@@ -119,6 +119,6 @@ def test_timing(state):
 
 
 
-output = (test_timing(([6,4,2,3,5,5,5],1)))
+output = (test_timing(([20,20],1)))
 print("Time within limit", output[0])
 print("Value returned", output[1])
