@@ -1,6 +1,3 @@
-import math
-import time
-
 visited = {}
 def minimax_prune(state):
     global visited
@@ -105,20 +102,3 @@ def terminalTest(state):
         return -1
     else:
         return 0
-
-def test_timing(state):
-    # Start a timer
-    start = time.time()
-    # Call minimax function
-    value = minimax_prune(state)
-    end = time.time()
-    #calculate and return
-    duration = end-start
-    #print('Time taken:', duration)
-    return duration, value
-
-
-
-output = (test_timing(([20,20],1)))
-print("Time within limit", output[0])
-print("Value returned", output[1])
