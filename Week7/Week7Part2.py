@@ -84,7 +84,7 @@ def game_begin(state):
         if game_state[1] == 1:
              game_state = userturn(game_state)
         else:
-             game_state = AI_player_basic(game_state)
+             game_state = AI_player_rollout(game_state)
         print("state is", game_state)
 
     # if final state is 1, 2 wins
@@ -95,31 +95,46 @@ def game_begin(state):
 
 
 
-def AI_player_basic(state):
+def AI_player_rollout(state):
     global history
     possible_states = nextstates(state)
     best_value = float('-inf')
     best_state = None
     for s in possible_states:
-        value = min_value_prune(s, float('-inf'), float('inf'))
+        value = min_value_prune(s, float('-inf'), float('inf'), 3)
         if value > best_value:
             best_value = value
             best_state = s
     return best_state
 
-def min_value_prune(state, alpha, beta):
+def eval(state):
+    total = 0
+    count = 0
+    #Check if state is not a terminalState
+    while not terminalTest(state):
+        #Generate successors
+        successors = nextstates(state)
+        #Choose random state from successors
+        state = random.choice(successors)
+        #Test the state to find if terminal
+        total += terminalTest(state)
+        count += 1
+    return total / count
+
+def min_value_prune(state, alpha, beta, depth):
     global history
 
     if str(state) in history:
-        # print('history min', state, history[str(state)])
         return history[str(state)]
 
     if terminalTest(state):
         return -1
+    if depth == 0:
+        return eval(state)
 
     v = float('inf')
     for s in nextstates(state):
-        vD = max_value_prune(s,alpha,beta)
+        vD = max_value_prune(s,alpha,beta, depth-1)
         if vD < v:
             v = vD
             bestSucc = s
@@ -131,7 +146,7 @@ def min_value_prune(state, alpha, beta):
     return v
 
 
-def max_value_prune(state, alpha, beta):
+def max_value_prune(state, alpha, beta, depth):
     global history
     # Function to run the max part of minimax
 
@@ -143,11 +158,13 @@ def max_value_prune(state, alpha, beta):
 
     if terminalTest(state):
         return 1
+    if depth == 0:
+        return eval(state)
 
     v = float('-inf')
     bestSucc = ""
     for s in nextstates(state):
-        vD = min_value_prune(s, alpha, beta)
+        vD = min_value_prune(s, alpha, beta, depth-1)
         if vD > v:
             v = vD
         if vD >= beta:
