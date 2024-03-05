@@ -95,17 +95,12 @@ def game_begin(state):
 
 
 
-def AI_player_rollout(state):
+def AI_player_mcts(state):
     global history
-    possible_states = nextstates(state)
-    best_value = float('-inf')
-    best_state = None
-    for s in possible_states:
-        value = min_value_prune(s, float('-inf'), float('inf'), 3)
-        if value > best_value:
-            best_value = value
-            best_state = s
-    return best_state
+    while not terminalTest(state):
+        node = select(root_node, root_child, root_visits)
+        result = rollout(node)
+        backpropagate(node, result)
 
 def eval(state):
     total = 0
@@ -117,62 +112,26 @@ def eval(state):
         #Choose random state from successors
         state = random.choice(successors)
         #Test the state to find if terminal
-        total += terminalTest(state)
-        count += 1
-    return total / count
+        total += terminalTest(state)    #total == t (total rewards)
+        count += 1  #count == n
+    return total / count    #value estimate (v)
 
-def min_value_prune(state, alpha, beta, depth):
-    global history
+def ucb(state, N, ni):
+    c = 2
+    vi = eval(state)
+    return vi + c * math.sqrt((math.log(N)/ni))
 
-    if str(state) in history:
-        return history[str(state)]
+def select(root_node, root_child, root_visits):
+    max_ucb = float('-inf')
+    for i in root_child:
+        curr
 
+def rollout(state):
     if terminalTest(state):
-        return -1
-    if depth == 0:
-        return eval(state)
-
-    v = float('inf')
-    for s in nextstates(state):
-        vD = max_value_prune(s,alpha,beta, depth-1)
-        if vD < v:
-            v = vD
-            bestSucc = s
-        if vD <= alpha:
-            return v
-        if vD < beta:
-            beta = vD
-    history[str(bestSucc)] = v
-    return v
-
-
-def max_value_prune(state, alpha, beta, depth):
-    global history
-    # Function to run the max part of minimax
-
-    # First test, is it already expanded?  If so, just return value
-    # print(history)
-    if str(state) in history:
-        # print('history', state, history[str(state)])
-        return history[str(state)]
-
-    if terminalTest(state):
-        return 1
-    if depth == 0:
-        return eval(state)
-
-    v = float('-inf')
-    bestSucc = ""
-    for s in nextstates(state):
-        vD = min_value_prune(s, alpha, beta, depth-1)
-        if vD > v:
-            v = vD
-        if vD >= beta:
-            return v
-        if vD > alpha:
-            alpha = vD
-    history[str(bestSucc)] = v
-    return v
+        return 0
+    successors = nextstates(state)
+    a = random.choice(successors)
+    return rollout(a)
 
 def terminalTest(state):
     if state == ([], 1):
