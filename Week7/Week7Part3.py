@@ -2,6 +2,15 @@ import random
 import time
 import math
 
+class Node:
+    def __init__(self, state, player, parent=None):
+        self.state = state
+        self.player = player
+        self.parent = parent
+        self.children = []
+        self.visits = 0
+        self.value = 0
+
 # Main function to run game
 def Nim():
     # initial variables
@@ -84,7 +93,7 @@ def game_begin(state):
         if game_state[1] == 1:
              game_state = userturn(game_state)
         else:
-             game_state = AI_player_rollout(game_state)
+             game_state = AI_player_mcts(game_state)
         print("state is", game_state)
 
     # if final state is 1, 2 wins
@@ -96,11 +105,13 @@ def game_begin(state):
 
 
 def AI_player_mcts(state):
-    global history
-    while not terminalTest(state):
-        node = select(root_node, root_child, root_visits)
-        result = rollout(node)
-        backpropagate(node, result)
+    root = Node(state, state[1])
+    for _ in range(1000):
+        while not terminalTest(root):
+            node = select(root)
+            result = rollout(node)
+            backpropagation(node, result)
+    return select(root)
 
 def eval(state):
     total = 0
@@ -116,22 +127,50 @@ def eval(state):
         count += 1  #count == n
     return total / count    #value estimate (v)
 
-def ucb(state, N, ni):
+def ucb(state):
     c = 2
     vi = eval(state)
-    return vi + c * math.sqrt((math.log(N)/ni))
+    ni = state.visits
+    print("Hello")
+    return vi + c * math.sqrt((math.log(ni)/ni))
 
-def select(root_node, root_child, root_visits):
+def select(root):
     max_ucb = float('-inf')
-    for i in root_child:
-        curr
+    selected_child = []
+    print("Hey")
+    if len(root.children) < len(nextstates(root.state)):
+        expansion(root)
+    else:
+        for i in root.children:
+            curr_ucb = ucb(i)
+            if curr_ucb > max_ucb:
+                max_ucb = curr_ucb
+                selected_child = i
+        return selected_child
 
-def rollout(state):
-    if terminalTest(state):
-        return 0
-    successors = nextstates(state)
-    a = random.choice(successors)
-    return rollout(a)
+def rollout(node):
+    while not terminalTest(node):
+        successors = nextstates(node)
+        node = random.choice(successors)
+    return node[1]
+
+def expansion(node):
+    if not node.children:
+        return state
+    max_ucb = float('-inf')
+    selected_child = None
+    for i in node.children:
+        curr_ucb = ucb(i)
+        if curr_ucb > max_ucb:
+            max_ucb = curr_ucb
+            selected_child = i
+    return expansion(selected_child)
+
+def backpropagation(node, v):
+    while node.parent is not None:
+        node.parent += v
+        node = node.parent
+    return node
 
 def terminalTest(state):
     if state == ([], 1):

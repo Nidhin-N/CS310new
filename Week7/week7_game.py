@@ -15,7 +15,7 @@ def Nim():
     valid = False
     while not valid:
         try:
-            # Get piles and sticks
+            #Get piles and sticks
             numPiles = input("How many piles initially? ")
             maxSticks = input("Maximum number of sticks? ")
 
@@ -24,6 +24,7 @@ def Nim():
                 # Use random numbers to generate random number of sticks
                 sticks = random.randint(1,int(maxSticks))
                 initialState.append(sticks)
+
 
             # set first or second go and create state
             print("The initial state is " + str(initialState))

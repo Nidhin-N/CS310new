@@ -18,11 +18,12 @@ def Nim():
             numPiles = input("How many piles initially? ")
             maxSticks = input("Maximum number of sticks? ")
 
-            # Create initial state
+            #Create initial state
             for i in range(int(numPiles)):
                 # Use random numbers to generate random number of sticks
                 sticks = random.randint(1,int(maxSticks))
                 initialState.append(sticks)
+
 
             # set first or second go and create state
             print("The initial state is " + str(initialState))
@@ -107,7 +108,7 @@ def AI_player_rollout(state):
             best_state = s
     return best_state
 
-def eval(state):
+def evaluate(state):
     total = 0
     count = 0
     #Check if state is not a terminalState
@@ -119,7 +120,7 @@ def eval(state):
         #Test the state to find if terminal
         total += terminalTest(state)
         count += 1
-    return total / count
+    return total, count
 
 def min_value_prune(state, alpha, beta, depth):
     global history
@@ -130,8 +131,14 @@ def min_value_prune(state, alpha, beta, depth):
     if terminalTest(state):
         return -1
     if depth == 0:
-        return eval(state)
-
+        total = 0
+        count = 0
+        for _ in range(5):
+            t, c = evaluate(state)
+            total += t
+            count += c
+            return total/count
+    bestSucc = ""
     v = float('inf')
     for s in nextstates(state):
         vD = max_value_prune(s,alpha,beta, depth-1)
@@ -159,7 +166,13 @@ def max_value_prune(state, alpha, beta, depth):
     if terminalTest(state):
         return 1
     if depth == 0:
-        return eval(state)
+        total = 0
+        count = 0
+        for _ in range(5):
+            t, c = evaluate(state)
+            total += t
+            count += c
+            return total / count
 
     v = float('-inf')
     bestSucc = ""
