@@ -60,10 +60,10 @@ def userturn(state):
     succ = nextstates(state)
 
     # if only an empty state left, pick the stick and return
-    if(len(succ)==1 and succ[0][0] ==[1]):    
+    if(len(succ)==1 and succ[0][0] ==[1]):
         print("Only one stick left, and you picked it up")
         return succ[0]
-    if(len(succ)==1 and succ[0][0] ==[]):    
+    if(len(succ)==1 and succ[0][0] ==[]):
         print("You picked up the last stick!")
         return succ[0]
     # Print list of moves
@@ -103,17 +103,16 @@ def game_begin(state):
         print("You won!")
 
 
-
 def AI_player_mcts(state):
     root = Node(state, state[1])
     for _ in range(1000):
-        while not terminalTest(root):
-            node = select(root)
-            result = rollout(node)
-            backpropagation(node, result)
-    return select(root)
+        node = select(root)
+        result = playOut(node.state)
+        backpropogate(node, result)
+    best_next_state = best_child(root, 0)
+    return best_next_state.state
 
-def eval(state):
+def evaluate(state):
     total = 0
     count = 0
     #Check if state is not a terminalState
@@ -127,58 +126,55 @@ def eval(state):
         count += 1  #count == n
     return total / count    #value estimate (v)
 
-def ucb(state):
-    c = 2
-    vi = eval(state)
-    ni = state.visits
-    print("Hello")
-    return vi + c * math.sqrt((math.log(ni)/ni))
 
-def select(root):
-    max_ucb = float('-inf')
-    selected_child = []
-    print("Hey")
-    if len(root.children) < len(nextstates(root.state)):
-        expansion(root)
-    else:
-        for i in root.children:
-            curr_ucb = ucb(i)
-            if curr_ucb > max_ucb:
-                max_ucb = curr_ucb
-                selected_child = i
-        return selected_child
-
-def rollout(node):
-    while not terminalTest(node):
-        successors = nextstates(node)
-        node = random.choice(successors)
-    return node[1]
-
-def expansion(node):
-    if not node.children:
-        return state
-    max_ucb = float('-inf')
-    selected_child = None
-    for i in node.children:
-        curr_ucb = ucb(i)
-        if curr_ucb > max_ucb:
-            max_ucb = curr_ucb
-            selected_child = i
-    return expansion(selected_child)
-
-def backpropagation(node, v):
-    while node.parent is not None:
-        node.parent += v
-        node = node.parent
+def select(node):
+    while not node.state[0] == ():
+        if len(node.children) < len(nextstates(node.state)):
+            return expansion(node)
+        else:
+            node = best_child(node, 2)
     return node
 
-def terminalTest(state):
-    if state == ([], 1):
-        return 1
-    elif state == ([], 2):
-        return -1
-    else:
-        return 0
+def expansion(node):
+    unplayed_states = []
+    for s in nextstates(node.state):
+        is_played = False
+        for child in node.children:
+            if s == child.state:
+                is_played = True
+                break
+        if not is_played:
+            unplayed_states.append(s)
+
+    new_state = random.choice(unplayed_states)
+    new_player = 1 if node.player == 2 else 2
+    child_node = Node(new_state, new_player, parent=node)
+    node.children.append(child_node)
+
+    return child_node
+
+def playOut(state):
+    while state[0]:
+        state = random.choice(nextstates(state))
+    return state[1]
+
+def backpropogate(node, v):
+    while node is not None:
+        node.visits += 1
+        node.value += v
+        node = node.parent
+
+def best_child(node, exploration_weight):
+    best_score = float('-inf')
+    best_children = []
+    for child in node.children:
+        ucb_score = child.value / child.visits + exploration_weight * math.sqrt(2 * math.log(node.visits) / child.visits)
+        if ucb_score == best_score:
+            best_children.append(child)
+        elif ucb_score > best_score:
+            best_score = ucb_score
+            best_children = [child]
+    return random.choice(best_children)
 
 def nextstates(state):
     # Function to get all next states
