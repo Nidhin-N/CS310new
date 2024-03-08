@@ -8,7 +8,7 @@ class Perceptron(object):
     # is created. It can be used to initialize #
     # the attributes of the class.             #
     #==========================================#
-    def __init__(self, no_inputs, max_iterations=20, learning_rate=0.1):
+    def __init__(self, no_inputs, max_iterations=5, learning_rate=0.1):
         self.no_inputs = no_inputs
         self.weights = np.ones(no_inputs) / no_inputs
         self.max_iterations = max_iterations
@@ -27,7 +27,12 @@ class Perceptron(object):
     # set of inputs.                          #
     #=========================================#
     def predict(self, inputs):
-        return 0
+        assert len(inputs) == len(self.weights)
+        a = np.dot(inputs, self.weights)
+        if a > 0:
+            return 1
+        else:
+            return 0
 
     #======================================#
     # Trains the perceptron using labelled #
@@ -35,7 +40,16 @@ class Perceptron(object):
     #======================================#
     def train(self, training_data, labels):
         assert len(training_data) == len(labels)
-        return
+        for _ in range(self.max_iterations):
+            totalError = 0
+            for inputs, label in zip(training_data, labels):
+                prediction = self.predict(inputs)
+                error = label - prediction
+                self.weights = self.weights + self.learning_rate * error * inputs
+                totalError += abs(error)
+                print(self.weights)
+            if totalError == 0:
+                break
 
     #=========================================#
     # Tests the prediction on each element of #
@@ -43,7 +57,15 @@ class Perceptron(object):
     #=========================================#
     def test(self, testing_data, labels):
         assert len(testing_data) == len(labels)
+        total = len(labels)
+        valid = 0
         accuracy = 0.0
+        for inputs, label in zip(testing_data, labels):
+            prediction = self.predict(inputs)
+            print("actual\t" +str(label)+"\t est\t" +str(prediction))
+            if prediction == label:
+                valid += 1
+        accuracy = (valid / total)*100
         print("Accuracy:\t"+str(accuracy))
 
 
