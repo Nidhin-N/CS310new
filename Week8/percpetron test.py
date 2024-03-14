@@ -14,10 +14,10 @@ xor_label = [0, 1, 1, 0]
 
 p = Perceptron(3)
 p.print_details()
-p.test(logic_input, xor_label)
+p.test(logic_input, or_label)
 
 # Train the Perceptron on XOR gate data
-p.train(logic_input, xor_label)
+p.train(logic_input, or_label)
 
 # Test the Perceptron after training
-p.test(logic_input, xor_label)
+p.test(logic_input, or_label)

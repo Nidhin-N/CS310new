@@ -1,6 +1,6 @@
 import numpy as np
+from PerceptronPt3 import Perceptron
 import matplotlib.pyplot as plt
-from Perceptron import Perceptron
 
 p = Perceptron(785)
 
@@ -15,17 +15,15 @@ train_label = [ int(d[0]==target_digit) for d in train_data ]
 test_input = [ np.append([1],d[1:]) for d in test_data ]
 test_label = [int(d[0]==target_digit) for d in test_data ]
 
-
+fig = plt.figure(figsize=(4,4))
+data = p.weights[1:].reshape(28,28)
+vis = train_input[15][1:].reshape(28,28)
+plt.imshow(vis)
+plt.show()
 
 p.print_details()
 p.test(test_input, test_label)
 
-p.train(train_input, train_label)
+p.train_batch(train_input, train_label)
 
 p.test(test_input, test_label)
-
-fig = plt.figure(figsize=(4,4))
-data = p.weights[1:].reshape(28,28)
-vis = train_input[15][1:].reshape(28,28)
-plt.imshow(data)
-plt.show()
