@@ -30,7 +30,7 @@ def modelling(train_input, train_label, test_input, test_label):
     # Create model
     model = Sequential()
 
-    model.add(Dense(32, activation='softmax', input_shape=(n_features,)))
+    model.add(Dense(64, activation='softmax', input_shape=(n_features,)))
     model.add(Dense(10, activation='softmax'))
 
     model.compile(optimizer='Adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
