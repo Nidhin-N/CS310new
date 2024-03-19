@@ -31,8 +31,8 @@ def modelling(X_train, y_train, X_test, y_test):
     # Create model
     model = Sequential()
 
-    model.add(Dense(32, activation='softmax', input_shape=(n_features,)))
-    model.add(Dense(23, activation='softmax'))
+    model.add(Dense(32, activation='relu', input_shape=(n_features,)))
+    model.add(Dense(23, activation='linear'))
 
     model.compile(optimizer='Adam', loss='mse', metrics=['accuracy'])
     model.summary()
